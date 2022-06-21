@@ -1,0 +1,1 @@
+This repository contains projects to demonstrate issues from [netxduo](https://github.com/azure-rtos/netxduo) repository.
