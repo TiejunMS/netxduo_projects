@@ -211,8 +211,12 @@ static void thread_0_entry(ULONG thread_input)
 {
 UINT status;
 ULONG bytes_copied;
-NX_PACKET *packet_ptr;
+NX_PACKET *packet_ptr = NX_NULL;
 NXD_ADDRESS server_address;
+NX_PACKET *packet_ptr_s = NULL;
+UINT pos_in_packet;
+ULONG receive_size_max = 1024;
+
 
     server_address.nxd_ip_version = NX_IP_VERSION_V4;
     server_address.nxd_ip_address.v4 = SERVER_IPV4_ADDRESS;
@@ -257,32 +261,47 @@ NXD_ADDRESS server_address;
     {
         
         /* Wait for a packet.  */
-        status = nx_secure_tls_session_receive(&tls_client_session_0, &packet_ptr, NX_WAIT_FOREVER);
-        if (status)
+        if (!packet_ptr)
         {
-            ERROR_COUNTER();
-            break;
+            status = nx_secure_tls_session_receive(&tls_client_session_0, &packet_ptr, NX_WAIT_FOREVER);
+            if (status)
+            {
+                ERROR_COUNTER();
+                break;
+            }
+            total_bytes += packet_ptr->nx_packet_length;
+            printf("Received packet: %05lu bytes, total %07u bytes\r\n", packet_ptr->nx_packet_length, total_bytes);
+
+            pos_in_packet = 0;
         }
 
-        total_bytes += packet_ptr -> nx_packet_length;
-        printf("Received packet: %05lu bytes, total %07u bytes\r\n", packet_ptr -> nx_packet_length, total_bytes);
-
         /* Extract the data from the packet.  */
-        status = nx_packet_data_extract_offset(packet_ptr, 0, receive_buffer,
-                                               sizeof(receive_buffer), &bytes_copied);
-        if (status || bytes_copied != packet_ptr -> nx_packet_length)
+        ULONG remain = packet_ptr->nx_packet_length - pos_in_packet;
+        ULONG length = (remain < receive_size_max) ? remain : receive_size_max;
+        status = nx_packet_data_extract_offset(packet_ptr, pos_in_packet, receive_buffer,
+                                               length, &bytes_copied);
+        if (status)
         {
             ERROR_COUNTER();
             nx_packet_release(packet_ptr);
             break;
         }
+        pos_in_packet += bytes_copied;
+        printf("Data copied: %05lu bytes, pos in packet: %05u\r\n", bytes_copied, pos_in_packet);
 
         /* Release received packet.  */
-        nx_packet_release(packet_ptr);
+        if (packet_ptr->nx_packet_length <= pos_in_packet)
+        {
+            nx_packet_release(packet_ptr);
+            packet_ptr = NULL;
+            pos_in_packet = 0;
+            printf("Packet released (pos in packet %05u)\r\n", pos_in_packet);
+        }
 
         /* Allocate a TLS packet for transmission.  */
         status = nx_secure_tls_packet_allocate(&tls_client_session_0, &pool_0,
-                                               &packet_ptr, NX_WAIT_FOREVER);
+                                               &packet_ptr_s, NX_WAIT_FOREVER);
+        printf("Packet allocated\r\n");
         if (status)
         {
             ERROR_COUNTER();
@@ -290,21 +309,23 @@ NXD_ADDRESS server_address;
         }
 
         /* Append data to the packet.  */
-        status = nx_packet_data_append(packet_ptr, receive_buffer, bytes_copied, &pool_0,
+        status = nx_packet_data_append(packet_ptr_s, receive_buffer, bytes_copied, &pool_0,
                                        NX_WAIT_FOREVER);
+        printf("Data appended %05lu\r\n", bytes_copied);
         if (status)
         {
             ERROR_COUNTER();
-            nx_packet_release(packet_ptr);
+            nx_packet_release(packet_ptr_s);
             break;
         }
 
         /* Send the data back to the server.  */
-        status = nx_secure_tls_session_send(&tls_client_session_0, packet_ptr, NX_WAIT_FOREVER);
+        status = nx_secure_tls_session_send(&tls_client_session_0, packet_ptr_s, NX_WAIT_FOREVER);
+        printf("Data sent\r\n");
         if (status)
         {
             ERROR_COUNTER();
-            nx_packet_release(packet_ptr);
+            nx_packet_release(packet_ptr_s);
             break;
         }
     }
