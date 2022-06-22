@@ -215,7 +215,7 @@ NX_PACKET *packet_ptr = NX_NULL;
 NXD_ADDRESS server_address;
 NX_PACKET *packet_ptr_s = NULL;
 UINT pos_in_packet;
-ULONG receive_size_max = 1024;
+ULONG receive_size_max = 17000;
 
 
     server_address.nxd_ip_version = NX_IP_VERSION_V4;
