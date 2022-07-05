@@ -20,6 +20,7 @@ sh -c "cat > /etc/default/isc-dhcp-server" <<EOT
 INTERFACESv4="veth2"
 EOT
 pkill dhcpd
+sleep 1
 touch /dhcpd.leases
 /usr/sbin/dhcpd -lf /dhcpd.leases
 
