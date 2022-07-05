@@ -167,7 +167,7 @@ UINT               packet_type;
             packet_ptr = NX_NULL;
             data = nx_linux_receive_buffer;
         }
-        else if (nx_linux_default_ip -> nx_ip_default_packet_pool -> nx_packet_pool_payload_size >= NX_MAX_PACKET_SIZE)
+        else if (nx_linux_default_ip -> nx_ip_default_packet_pool -> nx_packet_pool_payload_size >= NX_LINK_MTU)
         {
             data = packet_ptr -> nx_packet_prepend_ptr + 2;
         }
@@ -177,7 +177,7 @@ UINT               packet_type;
         }
 
         address_len = sizeof(from_address);
-        bytes_received = recvfrom(nx_linux_socket, (VOID *)data, NX_MAX_PACKET_SIZE, 0,
+        bytes_received = recvfrom(nx_linux_socket, (VOID *)data, NX_LINK_MTU, 0,
                                   (struct sockaddr *)&from_address, &address_len);
 
         if (bytes_received < 14)
