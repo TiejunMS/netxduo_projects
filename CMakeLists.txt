@@ -30,3 +30,5 @@ add_definitions(-DNX_LINUX_INTERFACE_NAME=\"${IF_NAME}\")
 add_subdirectory(${LIBS_DIR}/threadx lib/threadx)
 add_subdirectory(${LIBS_DIR}/netxduo lib/netxduo)
 add_subdirectory(${BASE_DIR}/issue_107)
+add_subdirectory(${BASE_DIR}/issue_112)
+

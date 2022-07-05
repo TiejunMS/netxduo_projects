@@ -10,7 +10,7 @@ sh -c "cat > /etc/dhcp/dhcpd.conf" <<EOT
 subnet 192.168.1.0 netmask 255.255.255.0 {
     range 192.168.1.100 192.168.1.200;
     option routers 192.168.1.1;
-    option domain-name-servers `host -v localhost| awk -F "[ #]" '/Received /{print$5}' | uniq`;
+    option domain-name-servers 1.1.1.1;
     option broadcast-address 192.168.1.255;
     default-lease-time 600;
     max-lease-time 7200;
@@ -20,6 +20,7 @@ sh -c "cat > /etc/default/isc-dhcp-server" <<EOT
 INTERFACESv4="veth2"
 EOT
 pkill dhcpd
+sleep 1
 touch /dhcpd.leases
 /usr/sbin/dhcpd -lf /dhcpd.leases
 
