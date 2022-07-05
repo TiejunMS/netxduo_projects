@@ -167,7 +167,7 @@ UINT               packet_type;
             packet_ptr = NX_NULL;
             data = nx_linux_receive_buffer;
         }
-        else if (nx_linux_default_ip -> nx_ip_default_packet_pool -> nx_packet_pool_payload_size >= NX_LINK_MTU)
+        else if (nx_linux_default_ip -> nx_ip_default_packet_pool -> nx_packet_pool_payload_size >= (NX_LINK_MTU + 2))
         {
             data = packet_ptr -> nx_packet_prepend_ptr + 2;
         }
