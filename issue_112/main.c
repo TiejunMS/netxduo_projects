@@ -41,7 +41,7 @@
 #define METADATA_SIZE           16000
 #define CERT_BUFFER_SIZE        4096
 #define PACKET_BUFFER_SIZE      40960
-#define SERVER_PORT             433
+#define SERVER_PORT             443
 #define IP_THREAD_PRIORITY      1
 #define THREAD_PRIORITY         4
 
