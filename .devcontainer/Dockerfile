@@ -1,7 +1,7 @@
 # See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.209.6/containers/ubuntu/.devcontainer/base.Dockerfile
 
 # [Choice] Ubuntu version (use hirsuite or bionic on local arm64/Apple Silicon): hirsute, focal, bionic
-ARG VARIANT="hirsute"
+ARG VARIANT="focal"
 FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 
 # This Dockerfile's base image has a non-root user with sudo access. Use the "remoteUser"
@@ -25,7 +25,7 @@ RUN apt update \
     && rm /usr/share/keyrings/kitware-archive-keyring.gpg \
     #
     # Install C++ tools and Git
-    && apt -y install --no-install-recommends sudo build-essential gcc-multilib g++-multilib gdb cgdb cppcheck git cmake kitware-archive-keyring ninja-build zip unzip ethtool iproute2 isc-dhcp-server iptables net-tools dnsutils iputils-ping \
+    && apt -y install --no-install-recommends sudo build-essential gcc-multilib g++-multilib gdb cgdb cppcheck git cmake kitware-archive-keyring ninja-build zip unzip ethtool iproute2 isc-dhcp-server iptables net-tools dnsutils iputils-ping ncat\
     #
     # [Optional] Update UID/GID if needed
     && if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
@@ -42,7 +42,9 @@ RUN apt update \
 # Install vcpkg dependency manager
 RUN git clone https://github.com/Microsoft/vcpkg ${VCPKG_ROOT} \
     && cd ${VCPKG_ROOT} \
-    && ./bootstrap-vcpkg.sh
+    && ./bootstrap-vcpkg.sh \
+    && mkdir /root/.vcpkg \
+    && touch /root/.vcpkg/vcpkg.path.txt
 
 ENV PATH "${VCPKG_ROOT}:${PATH}"
 
