@@ -31,6 +31,6 @@ IP address: 192.168.1.100
 Mask: 255.255.255.0
 Gateway: 192.168.1.1
 TCP connection established
-ERROR
+TLS session established
 ```
 
